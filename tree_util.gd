@@ -1,11 +1,9 @@
 extends RefCounted
 ## Shared helpers for tree commands. Commands read absolute node paths from stdin, one per
 ## line, and print absolute paths, so every pipeline stage resolves them the same way.
-## Optional host hook: ctx.host_data["tree_undo_redo"]: Callable() -> Object, an UndoRedo-like
-## object; null applies changes directly.
+## Undo goes through GDSh core: ctx.host_data["undo_redo"] and `undoredo --compound`.
 
 const Context = preload("res://addons/addon_lib/gdsh/context.gd")
-const TreeAction = preload("res://addons/addon_lib/gdsh_lib/tree/tree_action.gd")
 
 
 static func get_tree_root() -> Window:
@@ -60,7 +58,5 @@ static func _walk(node:Node, out:Array) -> void:
 
 
 ## One undoable action per command, committed to the host's undo object when there is one.
-static func action(ctx:Context, name:String) -> TreeAction:
-	var hook = ctx.host_data.get("tree_undo_redo")
-	var undo_redo = hook.call() if hook is Callable and hook.is_valid() else null
-	return TreeAction.new(name, undo_redo)
+static func action(ctx:Context, name:String) -> Context.Undo.Action:
+	return ctx.undo_action(name)

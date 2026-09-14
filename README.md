@@ -1,8 +1,7 @@
 # GDSh tree
 
-SceneTree commands for [GDSh](https://github.com/brohd11/godot-gdsh.git) consoles.
-They have no editor dependency and no implicit root: every command works on the node
-paths piped into it.
+SceneTree commands for [GDSh](https://github.com/brohd11/godot-gdsh.git).
+Usable in editor, or in a runtime debug console.
 
 ## Loading
 
@@ -18,13 +17,52 @@ Load `tree.gd`, not the directory, so the subcommands stay under `tree`.
 Commands take **absolute node paths** on stdin, one per line, and print absolute paths,
 so every stage of a pipeline resolves them the same way. A chain starts from a path:
 `tree root` prints `/root`, and hosts can add their own starting points (Editor Console
-has `editor scene root` and `editor scene select`).
+has `editor scene root` and `editor scene select` which operate at the edited scene level).
 
+Examples:
 ```sh
-tree root | tree nodes                             # children of /root
-tree root | tree nodes --recursive Label | tree prop text Hi
+# get the children of the root
+tree root | tree nodes
+
+# recursively get the children of the root of the type label.
+# then set the 'text' property to 'Hi'
+tree root | tree nodes --recursive --type=Label | tree prop text Hi
+
+# add a timer named 'Cooldown' to node
 echo /root/Main | tree add Timer Cooldown
+
+# pack the 'Level' branch and save the scene to path
 echo /root/Main/Level | tree pack user://level.tscn
+
+# Advanced example
+
+# This is a function that takes a node as an argument, finds all labels,
+# creates an hbox, reparents the label, adds an icon, then reindexes the new node
+
+# first, we'll create a shorthand for echo, 'p' for path
+p() { echo "$1" }
+
+add_icons(){
+	local nodes=$(p "$1" | tree nodes -r --type=Label)
+	if [ "$nodes" == "" ] { return 1 }
+	
+	# every loop here is 4 actions, we can combine them all into one commitable action
+	undoredo --compound "Add Icons to Labels" 1>discard
+
+	for n in $nodes {
+		local parent=$(p "$n" | tree parent)
+		local idx=$(p "$n" | tree index)
+		local h=$(p "$parent" | tree add HBoxContainer H)
+		p "$n" | tree reparent "$h" 1>discard
+		p "$h" | tree add TextureRect Icon 1>discard
+		p "$h" | tree index $idx 1>discard
+	}
+	undoredo commit 1>discard
+}
+
+# Using it with Editor Console to operate on the edited scene
+add_icons $(editor scene root)
+
 ```
 
 Relative paths and empty stdin are errors, so a chain whose first stage matched nothing
@@ -36,7 +74,10 @@ does nothing.
 | --- | --- |
 | `root` | Print `/root` |
 | `nodes` | List children (`--recursive` for descendants), filtered by class, script, or `--owned`; `--pretty` tree |
+| `parent` | Get node's parent path |
 | `add` / `instance` | Add a node / instance a scene under each node |
+| `duplicate` | Copy nodes next to themselves as `Name_<first free int>`, or `--name` / `--suffix` |
+| `index` | Get or set the index of the node. |
 | `free` | Remove nodes (never `/root`) |
 | `prop` | Get or set a property (`position:x` paths, typed conversion) |
 | `rename` / `reparent` | Rename one node / move nodes under an absolute parent path |
@@ -52,16 +93,25 @@ owner, or by the parent when it is a scene root.
 
 ## Host hooks
 
-- `ctx.host_data["tree_undo_redo"]`: `Callable() -> Object`, optional. An `UndoRedo`, or
-  any object with its `create_action`/`add_do_*`/`add_undo_*`/`commit_action` methods
-  taking `(object, method, args...)`. Each command is one action. Null or no hook applies
-  changes directly.
+- Undo uses the GDSh core `ctx.host_data["undo_redo"]` hook. Each command is one action; wrap several in `undoredo --compound <action name>`
+  `undoredo commit` for a single entry. Null or no hook (default for runtime console) applies changes directly.
 - `pack` calls the GDSh `filesystem_changed` hook after saving.
 
 ## Exporting
 
-`manifest.gd` preloads every command so plugin exporters that follow preloads include
-them; preload it from the host.
+`manifest.gd` preloads every command for use with [PluginExporter](https://github.com/brohd11/Godot-Plugin-Exporter)
+
+
+## Install
+
+Download the release and place the contents in the addons folder.
+
+I use [gdaddon](https://github.com/brohd11/gdaddon) to manage the addon.
+```
+cd ~/your/project/
+gdaddon install brohd11/godot-gdsh-lib-tree
+```
+
 
 ## Validation
 
