@@ -16,11 +16,15 @@ Load `tree.gd`, not the directory, so the subcommands stay under `tree`.
 
 Commands take **absolute node paths** on stdin, one per line, and print absolute paths,
 so every stage of a pipeline resolves them the same way. A chain starts from a path:
-`tree root` prints `/root`, and hosts can add their own starting points (Editor Console
+`tree root` prints `/root`; a bare node path such as `/root/Main` prints its absolute
+path too. Use `cn /root/Main` to resolve bare child names relative to that node. Hosts can add their own starting points (Editor Console
 has `editor scene root` and `editor scene select` which operate at the edited scene level).
 
 Examples:
 ```sh
+# inspect a node directly
+/root/Main | tree inspect
+
 # get the children of the root
 tree root | tree nodes
 
