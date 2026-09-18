@@ -4,25 +4,25 @@ extends RefCounted
 ## Undo goes through GDSh core: ctx.host_data["undo_redo"] and `undoredo --compound`.
 
 const Context = preload("res://addons/addon_lib/gdsh/context.gd")
+const NodePaths = preload("res://addons/addon_lib/gdsh/internal/node_paths.gd")
 
 
 static func get_tree_root() -> Window:
-	var loop = Engine.get_main_loop()
-	return loop.root if loop is SceneTree else null
+	return NodePaths.root()
 
 
 static func path_of(node:Node) -> String:
-	return str(node.get_path())
+	return NodePaths.path_of(node)
 
 
 ## Nodes named by the absolute paths on stdin. Bad lines are reported and skipped; empty
-## stdin is reported too, so callers only need to fail on an empty result.
+## stdin is reported too, so callers only need to fail on an empty result. Absolute-only
+## validation stays here; core NodePaths also supports paths relative to a working node.
 static func resolve_targets(ctx:Context) -> Array:
 	var nodes := []
 	if ctx.stdin.strip_edges() == "":
 		ctx.append_error("No node paths on stdin (start a chain with 'tree root').")
 		return nodes
-	var root = get_tree_root()
 	for line in ctx.stdin.split("\n", false):
 		var p = line.strip_edges()
 		if p == "":
@@ -30,7 +30,7 @@ static func resolve_targets(ctx:Context) -> Array:
 		if not NodePath(p).is_absolute():
 			ctx.append_error("Not an absolute node path: " + p)
 			continue
-		var node = root.get_node_or_null(p) if root != null else null
+		var node = NodePaths.resolve(p)
 		if is_instance_valid(node):
 			nodes.append(node)
 		else:

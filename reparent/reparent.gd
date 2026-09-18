@@ -1,6 +1,7 @@
 extends "res://addons/addon_lib/gdsh/command_base.gd"
 
 const TreeUtil = preload("res://addons/addon_lib/gdsh_lib/tree/tree_util.gd")
+const NodePaths = preload("res://addons/addon_lib/gdsh/internal/node_paths.gd")
 
 const _HELP = \
 "Move the stdin nodes under a new parent (keeps global transform) and print their new absolute paths.
@@ -25,7 +26,7 @@ func _execute(ctx:Context):
 		ctx.append_error("Not an absolute node path: " + target_path)
 		return ExitCode.FAIL
 	var tree_root = TreeUtil.get_tree_root()
-	var target = tree_root.get_node_or_null(target_path) if tree_root != null else null
+	var target = NodePaths.resolve(target_path)
 	if not is_instance_valid(target):
 		ctx.append_error("Parent node not found: " + target_path)
 		return ExitCode.FAIL
