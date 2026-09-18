@@ -1,4 +1,4 @@
-extends "res://addons/addon_lib/gdsh/command_base.gd"
+extends "res://addons/addon_lib/gdsh/src/core/command_base.gd"
 
 const TreeUtil = preload("res://addons/addon_lib/gdsh_lib/tree/tree_util.gd")
 

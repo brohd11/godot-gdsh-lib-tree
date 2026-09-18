@@ -1,7 +1,7 @@
-extends "res://addons/addon_lib/gdsh/command_base.gd"
+extends "res://addons/addon_lib/gdsh/src/core/command_base.gd"
 
 const TreeUtil = preload("res://addons/addon_lib/gdsh_lib/tree/tree_util.gd")
-const NodePaths = preload("res://addons/addon_lib/gdsh/internal/node_paths.gd")
+const NodePaths = preload("res://addons/addon_lib/gdsh/src/core/node_paths.gd")
 
 const _HELP = \
 "Move the stdin nodes under a new parent (keeps global transform) and print their new absolute paths.

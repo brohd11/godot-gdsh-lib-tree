@@ -3,8 +3,8 @@ extends RefCounted
 ## line, and print absolute paths, so every pipeline stage resolves them the same way.
 ## Undo goes through GDSh core: ctx.host_data["undo_redo"] and `undoredo --compound`.
 
-const Context = preload("res://addons/addon_lib/gdsh/context.gd")
-const NodePaths = preload("res://addons/addon_lib/gdsh/internal/node_paths.gd")
+const Context = preload("res://addons/addon_lib/gdsh/src/core/context.gd")
+const NodePaths = preload("res://addons/addon_lib/gdsh/src/core/node_paths.gd")
 
 
 static func get_tree_root() -> Window:

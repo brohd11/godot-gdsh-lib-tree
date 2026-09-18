@@ -1,4 +1,4 @@
-extends "res://addons/addon_lib/gdsh/command_base.gd"
+extends "res://addons/addon_lib/gdsh/src/core/command_base.gd"
 ## Namespace for commands on the SceneTree. Children are the sibling `name/name.gd` dirs;
 ## load this file, not the directory, so they stay under `tree`.
 
