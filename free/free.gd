@@ -1,6 +1,6 @@
-extends "res://addons/addon_lib/gdsh/src/core/command_base.gd"
+extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 
-const TreeUtil = preload("res://addons/addon_lib/gdsh_lib/tree/tree_util.gd")
+const TreeUtil = preload("res://addons/_lib/gdsh_lib/tree/tree_util.gd")
 
 const _HELP = \
 "Remove the stdin nodes from the tree (undoable when the host provides undo, otherwise freed).

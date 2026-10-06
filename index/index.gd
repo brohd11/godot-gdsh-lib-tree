@@ -1,6 +1,6 @@
-extends "res://addons/addon_lib/gdsh/src/core/command_base.gd"
+extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 
-const TreeUtil = preload("res://addons/addon_lib/gdsh_lib/tree/tree_util.gd")
+const TreeUtil = preload("res://addons/_lib/gdsh_lib/tree/tree_util.gd")
 
 const _HELP = \
 "Print the child index of each stdin node, or move the nodes to an index within their parent.

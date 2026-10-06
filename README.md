@@ -7,7 +7,7 @@ Usable in editor, or in a runtime debug console.
 
 ```gdscript
 var ctx = GDSh.Context.new()
-ctx.load("res://addons/addon_lib/gdsh_lib/tree/tree.gd")
+ctx.load("res://addons/_lib/gdsh_lib/tree/tree.gd")
 ```
 
 Load `tree.gd`, not the directory, so the subcommands stay under `tree`.

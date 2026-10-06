@@ -1,6 +1,6 @@
-extends "res://addons/addon_lib/gdsh/src/core/command_base.gd"
+extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 
-const TreeUtil = preload("res://addons/addon_lib/gdsh_lib/tree/tree_util.gd")
+const TreeUtil = preload("res://addons/_lib/gdsh_lib/tree/tree_util.gd")
 
 const _HELP = \
 "Save the first stdin node's subtree as a PackedScene file and print the file path (pipe into 'open').
