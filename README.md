@@ -120,5 +120,5 @@ gdaddon install brohd11/godot-gdsh-lib-tree
 ## Validation
 
 ```sh
-python3 tests/gdsh_lib/run_headless.py --godot godot
+python3 addons/_lib/gdsh_lib/tree/_export_ignore/test/run_headless.py --godot godot
 ```
