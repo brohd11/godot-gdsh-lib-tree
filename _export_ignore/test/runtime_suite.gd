@@ -219,6 +219,51 @@ add_icons %s/Box""" % p
 	run(add_icons, "", ctx)
 	check(run("undoredo commit", "", ctx).stdout.contains("without undo") and tree_shape(box) == after, "compound without an undo object stays applied")
 	compound_redo.free()
+	ctx.host_data.erase("undo_redo")
+
+	# /scene: the current scene (the edited scene in the editor) prints and resolves as /scene.
+	var previous_scene = _tree().current_scene
+	_tree().current_scene = main
+	equal(out("echo %s/A | tree parent" % p, "", ctx), "/scene", "the scene root prints as /scene")
+	equal(out("echo %s | tree nodes Node2D" % p, "", ctx).get_slice("\n", 0), "/scene/A", "nodes in the scene print as /scene/...")
+	equal(out("echo /scene/A | tree prop position:x", "", ctx), "5.0", "/scene paths resolve for tree commands")
+	equal(out("echo /scene/A | tree add Label Short", "", ctx), "/scene/A/Short", "/scene output pipes back into tree commands")
+	equal(out("node /scene/A", "", ctx), "/scene/A", "node resolves /scene paths")
+	var gone = run("echo /scene/Nope | tree nodes", "", ctx)
+	check(gone.exit_code != 0 and gone.stderr.contains("Node not found: /scene/Nope"), "missing /scene paths are reported")
+	equal(out("tree root", "", ctx), "/root", "nodes outside the scene keep their full path")
+
+	# prop on an unset value (null): convert to the declared type; all-or-nothing on bad input.
+	var size_prop = "theme_override_font_sizes/font_size"
+	var short = "/scene/A/Short"
+	var prop_redo = UndoRedo.new()
+	ctx.host_data["undo_redo"] = func(): return prop_redo
+	equal(out("echo %s | tree prop %s 20" % [short, size_prop], "", ctx), "20", "prop sets an unset theme override")
+	prop_redo.undo()
+	equal(out("echo %s | tree prop %s" % [short, size_prop], "", ctx), "<null>", "undo clears the override again")
+	var bad_value = run("echo %s | tree prop %s abc" % [short, size_prop], "", ctx)
+	check(bad_value.exit_code != 0 and bad_value.stderr.contains("Cannot convert 'abc' to int"), "an unconvertible value fails: " + bad_value.stderr)
+	equal(prop_redo.get_history_count(), 1, "a failed set registers no undo")
+	var no_prop = run("echo %s | tree prop nope 1" % short, "", ctx)
+	check(no_prop.exit_code != 0 and no_prop.stderr.contains("No property 'nope'"), "an unknown property fails")
+	var mixed = run("tree prop %s 30" % size_prop, short + "\n/scene/A", ctx)
+	check(mixed.exit_code != 0 and main.get_node("A/Short").get(size_prop) == null, "one bad node changes nothing")
+	out("echo %s | tree prop %s 12" % [short, size_prop], "", ctx)
+	equal(out("echo %s | tree prop %s null" % [short, size_prop], "", ctx), "<null>", "'null' clears a value")
+	ctx.host_data.erase("undo_redo")
+	prop_redo.free()
+
+	# call: one request for every piped node; results line up with the inputs.
+	equal(out("tree call get_child_count", "/scene/A\n" + short, ctx), "%d\n0" % panel.get_child_count(), "call prints a result per node")
+	equal(out("echo %s | tree call get_child_count -v" % short, "", ctx), short + " = 0", "call --verbose prints path = result")
+	equal(out("echo %s | tree call set_meta k 5" % short, "", ctx), "", "a void method prints nothing, not conversion notes")
+	equal(out("echo %s | tree call get_meta k" % short, "", ctx), "5", "call converts and passes arguments")
+	var private_call = run("echo %s | tree call _ready" % short, "", ctx)
+	check(private_call.exit_code != 0 and private_call.stderr.contains("--private"), "private methods need --private")
+	var no_method = run("echo %s | tree call nope" % short, "", ctx)
+	check(no_method.exit_code != 0 and no_method.stderr.contains("'nope' not found"), "unknown methods fail: " + no_method.stderr)
+	_tree().current_scene = previous_scene
+	equal(out("echo /root/Main/A | tree nodes --include-self", "", ctx).get_slice("\n", 0), p + "/A", "without a current scene paths stay full")
 	main.queue_free()
 
 
