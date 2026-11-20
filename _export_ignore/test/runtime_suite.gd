@@ -45,7 +45,10 @@ func session() -> Sh.Context:
 func run(text:String, stdin:="", ctx:Sh.Context=null) -> Sh.Context:
 	var result = Sh.Context.new_ctx("test", ctx if ctx != null else session())
 	result.stdin = stdin
+	# Checkpoints would yield a frame after 50 ms and drop output this sync read expects.
+	result.cancel_token.sync_depth += 1
 	Sh.Execute.execute_command_multiline(text, result)
+	result.cancel_token.sync_depth -= 1
 	return result
 
 
