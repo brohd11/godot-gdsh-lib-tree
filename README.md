@@ -3,6 +3,8 @@
 SceneTree commands for [GDSh](https://github.com/brohd11/godot-gdsh.git).
 Usable in editor, or in a runtime debug console.
 
+Install: see [Command packages](https://github.com/brohd11/godot-gdsh/blob/main/_export_ignore/docs/packages.md) in the gdsh repo.
+
 ## Loading
 
 ```gdscript
@@ -104,17 +106,6 @@ owner, or by the parent when it is a scene root.
 ## Exporting
 
 `manifest.gd` preloads every command for use with [GDPackage](https://github.com/brohd11/godot-gdpackage)
-
-
-## Install
-
-Download the release and place the contents in the addons folder.
-
-I use [gdaddon](https://github.com/brohd11/gdaddon) to manage the addon.
-```
-cd ~/your/project/
-gdaddon install brohd11/godot-gdsh-lib-tree
-```
 
 
 ## Validation
